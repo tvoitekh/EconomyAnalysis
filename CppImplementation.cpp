@@ -5,7 +5,7 @@
 #include <string>
 using namespace std;
 
-int rows = 3, cols = 3;
+int N;
 vector <vector<double> > tech_matrix; 
 vector <double> final_demand, output;
 
@@ -111,15 +111,16 @@ vector <vector <double> > getMatrixInverse(vector <vector<double> > m)
 int main()
 {
     string str;
-    ifstream file("Input_demand.txt");
+    ifstream file("Test.txt");
     int select_mode;
     cout << "Manual input or reading from a file?\nManual input : 1\nReading from a file : 2\n";
     cin >> select_mode;
+    cout << "Enter number of sectors: ";
+    cin >> N;
     if (select_mode == 1)
     {
-        int amount_of_sectors, amount_of_primary_inputs;
-        cout << "Enter number of Sectors : ";
-        cin >> amount_of_sectors;
+        vector <double> primary_inputs(N , 1) , output_of_primary_inputs(N);
+        int amount_of_sectors = N, amount_of_primary_inputs;
         vector <vector <double> > technology(amount_of_sectors, vector <double> (amount_of_sectors));
         cout << "Input Technology Matrix:\n";
         for (int i = 0; i < amount_of_sectors; i++)
@@ -132,24 +133,36 @@ int main()
             cin >> num;
             final_demand.push_back(num);
         }
+        for (int i = 0; i < N; i++)
+        {
+            for (int j = 0; j < N; j++)
+                primary_inputs[j] -= technology[i][j];
+        }
         output = matrix_times_vector(getMatrixInverse(Subtract_Matrices(Identity(amount_of_sectors) , technology)), final_demand);
-        cout << "Total output of sectors is : ";
+        for (int i = 0; i < N; i++)
+            output_of_primary_inputs[i] = primary_inputs[i] * output[i];
+        cout << "Total required output of sectors is : ";
         for (int i = 0; i < output.size(); i++)
             cout << fixed << setprecision(2) << output[i] << ' ';
+        cout << '\n';
+        cout << "Total required output of primary inputs is : ";
+        for (int i = 0; i < N; i++)
+            cout << fixed << setprecision(2) << output_of_primary_inputs[i] << ' ';
         cout << '\n';
     }
     else if (select_mode == 2)
     {
-        for (int i = 0; i < rows; i++)
+        vector <double> primary_inputs(N , 1) , output_of_primary_inputs(N);
+        for (int i = 0; i < N; i++)
         {
             vector <double> temp;
-            for (int j = 0; j < cols + 1; j++)
+            for (int j = 0; j < N + 1; j++)
             {
                 string ch;
                 file >> ch;
                 for (int k = 0; k < ch.size(); k++)
                     if (ch[k] == ',') ch[k] = '.';
-                if (j == cols)
+                if (j == N)
                     final_demand.push_back(stod(ch));
                 else 
                     temp.push_back(stod(ch));
@@ -157,14 +170,24 @@ int main()
             }
             tech_matrix.push_back(temp);
         }
-        output = matrix_times_vector(getMatrixInverse(Subtract_Matrices(Identity(rows) , tech_matrix)), final_demand);
-        cout << "Total output of sectors is : ";
-        for (int i = 0; i < output.size(); i++)
-            cout << output[i] << ' ';
+        output = matrix_times_vector(getMatrixInverse(Subtract_Matrices(Identity(N) , tech_matrix)), final_demand);
+        for (int i = 0; i < N; i++)
+        {
+            for (int j = 0; j < N; j++)
+                primary_inputs[j] -= tech_matrix[i][j];
+        }
+        for (int i = 0; i < N; i++)
+            output_of_primary_inputs[i] = primary_inputs[i] * output[i];
+        cout << "Total required output of sectors is : ";
+        for (int i = 0; i < N; i++)
+            cout << fixed << setprecision(2) << output[i] << ' ';
+        cout << '\n';
+        cout << "Total required output of primary inputs is : ";
+        for (int i = 0; i < N; i++)
+            cout << fixed << setprecision(2) << output_of_primary_inputs[i] << ' ';
         cout << '\n';
     }
     else 
         cout << "Invalid operation!\n";
-    vector <vector <double> > matrix;
     return 0;
 }
