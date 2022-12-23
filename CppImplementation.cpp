@@ -111,7 +111,7 @@ vector <vector <double> > getMatrixInverse(vector <vector<double> > m)
 int main()
 {
     string str;
-    ifstream file("Test.txt");
+    ifstream file("Test2.txt");
     int select_mode;
     cout << "Manual input or reading from a file?\nManual input : 1\nReading from a file : 2\n";
     cin >> select_mode;
